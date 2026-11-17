@@ -6,10 +6,15 @@ license = "MIT"
 
 [dependencies]
 anyhow = "1"
-openlogi-core = { path = "source/crates/openlogi-core", default-features = false, features = ["fs"] }
-openlogi-ipc = { path = "source/crates/openlogi-ipc" }
+openlogi-core = { git = "https://github.com/AprilNEA/OpenLogi.git", rev = "a5b507ec8802e0ecb7ef3de61ce7868609c9b533", default-features = false, features = ["fs"] }
+openlogi-ipc = { git = "https://github.com/AprilNEA/OpenLogi.git", rev = "a5b507ec8802e0ecb7ef3de61ce7868609c9b533" }
 tokio = { version = "1", features = ["rt", "time", "net"] }
 tarpc = "0.38"
 serde = { version = "1", features = ["derive"] }
 toml = "0.8"
 windows-sys = { version = "0.61", features = ["Win32_UI_WindowsAndMessaging", "Win32_UI_Input_KeyboardAndMouse"] }
+
+[profile.release]
+opt-level = "s"
+strip = true
+panic = "abort"

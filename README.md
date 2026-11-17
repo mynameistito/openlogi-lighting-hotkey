@@ -26,11 +26,13 @@ An empty `device_key` automatically selects the only online RGB keyboard with a 
 
 ## Build
 
-Clone with `git clone --recurse-submodules https://github.com/mynameistito/openlogi-lighting-hotkey.git` (or run `git submodule update --init` in an existing clone). Install Rust and the MSVC C++ build tools, then run `./build.ps1`. The output is in `dist`.
+Clone with `git clone https://github.com/mynameistito/openlogi-lighting-hotkey.git`. Install Rust and the MSVC C++ build tools, then run `./build.ps1`. The output is in `dist`. No submodule setup is needed.
 
 To produce the Windows installer, install [Inno Setup 6](https://jrsoftware.org/isdl.php), then run `./build-installer.ps1`. You can pass `-Compiler C:/path/to/ISCC.exe`. The setup executable is written to `dist`. Pull requests also build an installer through GitHub Actions; download the `windows-installer` artifact from the workflow run.
 
-The source submodule is pinned to OpenLogi v0.9.0. The wrapper imports its real IPC and config types rather than reimplementing the wire protocol. This checkout builds with Rust 1.98 using `--ignore-rust-version`; upstream declares 1.99 as its workspace minimum. Cargo.lock pins the dependencies.
+The two OpenLogi crates are Git dependencies pinned to the v0.9.0 release commit. Cargo fetches their source during builds; the wrapper imports the real IPC and config types rather than reimplementing the wire protocol. Tokio supplies the runtime required by that IPC connection. TOML/Serde parse settings, and windows-sys supplies Windows API declarations. These compile into the executable: end users install no Rust runtime, packages, or upstream source tree. Release builds optimize for size and strip symbols.
+
+This checkout builds with Rust 1.98 using `--ignore-rust-version`; upstream declares 1.99 as its workspace minimum. Cargo.lock pins the dependencies.
 
 For diagnostics, run the executable with `--status`, `--toggle`, or `--check-hotkey`. Release builds have no console; results go to `hotkey.log`.
 

@@ -1,4 +1,6 @@
 /target/
 /dist/
 /tools/
+# Former upstream checkout, retained locally after removing the submodule.
+/source/
 *.log
