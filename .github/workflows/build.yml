@@ -8,29 +8,32 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2025
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
       - name: Install Rust toolchain
-        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt
+        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
       - name: Check formatting
         run: cargo fmt --check
-      - name: Install Inno Setup compiler
-        shell: pwsh
-        run: |
-          $installer = Join-Path $env:RUNNER_TEMP 'innosetup.exe'
-          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe' -OutFile $installer
-          if ((Get-AuthenticodeSignature $installer).Status -ne 'Valid') { throw 'Invalid compiler installer signature' }
-          $destination = Join-Path $env:RUNNER_TEMP 'inno'
-          $process = Start-Process $installer -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/CURRENTUSER', '/portable=1', ('/DIR="' + $destination + '"')) -WindowStyle Hidden -Wait -PassThru
-          if ($process.ExitCode -ne 0) { throw 'Compiler installation failed' }
       - name: Build installer
-        run: ./build-installer.ps1 -Compiler "$env:RUNNER_TEMP/inno/ISCC.exe"
-      - uses: actions/upload-artifact@v4
+        # Inno Setup 6 is included in the Windows 2025 runner image.
+        run: ./build-installer.ps1
+      - name: Upload installer
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows-installer
           path: dist/*setup*.exe
