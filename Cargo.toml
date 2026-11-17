@@ -1,0 +1,15 @@
+[package]
+name = "openlogi-lighting-hotkey"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+anyhow = "1"
+openlogi-core = { path = "source/crates/openlogi-core", default-features = false, features = ["fs"] }
+openlogi-ipc = { path = "source/crates/openlogi-ipc" }
+tokio = { version = "1", features = ["rt", "time", "net"] }
+tarpc = "0.38"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+windows-sys = { version = "0.61", features = ["Win32_UI_WindowsAndMessaging", "Win32_UI_Input_KeyboardAndMouse"] }

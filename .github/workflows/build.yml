@@ -1,0 +1,38 @@
+name: Windows installer
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Install Inno Setup compiler
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP 'innosetup.exe'
+          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe' -OutFile $installer
+          if ((Get-AuthenticodeSignature $installer).Status -ne 'Valid') { throw 'Invalid compiler installer signature' }
+          $destination = Join-Path $env:RUNNER_TEMP 'inno'
+          $process = Start-Process $installer -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/CURRENTUSER', '/portable=1', ('/DIR="' + $destination + '"')) -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw 'Compiler installation failed' }
+      - name: Build installer
+        run: ./build-installer.ps1 -Compiler "$env:RUNNER_TEMP/inno/ISCC.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/*setup*.exe
+          if-no-files-found: error
+          retention-days: 14

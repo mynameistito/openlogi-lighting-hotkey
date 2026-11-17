@@ -1,0 +1,6 @@
+# Empty selects the only online RGB keyboard. With several keyboards, set its
+# physical device key from OpenLogi's config.toml (for example unit:12345678).
+device_key = ""
+# Windows virtual-key code: F12 = 123. Modifiers: Ctrl=2, Shift=4, Alt=1, Win=8.
+key = 123
+modifiers = 6
